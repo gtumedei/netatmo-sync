@@ -41,9 +41,11 @@ export const createNetatmoApiClient = (clientParams: {
           },
           body: searchParams.toString(),
         })
-        if (res.status != 200) {
-          // TODO: throw appropriate error
-        }
+        if (!res.ok)
+          throw new NetatmoError({
+            status: res.status,
+            body: (await res.json().catch(() => null)) as any,
+          })
         const data = (await res.json()) as {
           access_token: string
           refresh_token: string
@@ -70,15 +72,35 @@ export const createNetatmoApiClient = (clientParams: {
         if (params.optimize) searchParams.append("optimize", "true")
         if (params.realtime) searchParams.append("realtime", "true")
 
-        const res = await fetch(`${BASE_API_URL}?${searchParams.toString()}`, {
+        const res = await fetch(`${BASE_API_URL}/api/getmeasure?${searchParams.toString()}`, {
           headers: {
             "Content-type": "application/json",
             Authorization: `Bearer ${params.accessToken}`,
           },
         })
+        if (!res.ok)
+          throw new NetatmoError({
+            status: res.status,
+            body: (await res.json().catch(() => null)) as any,
+          })
         const data = await res.json() // TODO: type data
         return data
       },
     },
+  }
+}
+
+type NetatmoErrorPayload = { error: string | { code: number; message: string } }
+
+export class NetatmoError extends Error {
+  type: "client" | "server"
+  status: number
+  body?: NetatmoErrorPayload
+
+  constructor(params: { message?: string; status: number; body?: NetatmoErrorPayload }) {
+    super(params.message)
+    this.status = params.status
+    this.type = `${params.status}`.startsWith("4") ? "client" : "server"
+    this.body = params.body
   }
 }

@@ -2,7 +2,7 @@ import dayjs from "dayjs"
 import { db } from "~/db"
 import { Sensors } from "~/db/schema"
 import { env } from "~/lib/env"
-import { createNetatmoApiClient } from "~/lib/netatmo"
+import { createNetatmoApiClient, NetatmoError } from "~/lib/netatmo"
 import { loadTokens, storeTokens } from "~/lib/token-storage"
 
 let tokens = await loadTokens()
@@ -25,7 +25,6 @@ console.log(`Fetching data from ${dateBegin.toISOString()} to ${dateEnd.toISOStr
 // For each sensor
 for (const sensor of sensors) {
   console.log(`Fetching data for sensor "${sensor.name}" (ID: ${sensor.id})`)
-
   let tentatives = 0
   let tokenWasExpired = false
   let latestData: any = null
@@ -40,12 +39,11 @@ for (const sensor of sensors) {
         scale: "30min", // TODO: test "max" scale, not guaranteed to work but should return data in intervals of 5 minutes
         types: ["temperature", "humidity", "CO2", "noise", "pressure"],
       })
-      throw new Error()
     } catch (err) {
-      console.log(err)
-      if (true) {
-        console.log("Auth error")
+      console.error(err)
+      if (err instanceof NetatmoError && err.status == 403) {
         // If data fetching fails because of an expired access token, renew it and retry
+        console.log("Auth error: re-authenticating")
         try {
           const newTokens = await netatmo.authentication.refresh({
             refreshToken: tokens.refreshToken,
@@ -53,13 +51,15 @@ for (const sensor of sensors) {
           await storeTokens(newTokens)
           tokens = newTokens
           tokenWasExpired = true
-        } catch (err2) {}
-      } else if (true) {
-        console.log("Known error")
-        // If data fetching fails because of some errors, wait 300ms and retry up to two times
-        await new Promise((r) => setTimeout(r, 300))
+          console.log("Re-authentication completed successfully")
+        } catch (err2) {
+          console.log("Re-authentication failed")
+          console.error(err2)
+        }
       } else {
-        console.log("Unknown error")
+        // If data fetching fails because of some other errors, wait 300ms and retry up to two times
+        console.log(err instanceof NetatmoError ? "Known error" : "Unknown error")
+        await new Promise((r) => setTimeout(r, 300))
       }
     }
     tentatives++
