@@ -5,9 +5,9 @@ import "dotenv/config"
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  TURSO_DB_URL: z.string().url(),
-  TURSO_DB_TOKEN: z.string(),
-  CRON_SECRET: z.string(),
+  DATABASE_URL: z.string().url(),
+  NETATMO_CLIENT_ID: z.string(),
+  NETATMO_CLIENT_SECRET: z.string(),
 })
 
 const formatErrors = (errors: ZodFormattedError<Map<string, string>, string>) =>
