@@ -3,9 +3,9 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "start": "cross-env NODE_ENV=production node dist/main.js",
-    "dev": "cross-env NODE_ENV=development tsx src/main.ts",
-    "build": "esbuild src/main.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/main.js",
+    "preview": "cross-env NODE_ENV=production node scripts/preview.js",
+    "dev": "cross-env NODE_ENV=development tsx scripts/dev.ts",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/index.js",
     "typecheck": "tsc --noEmit",
     "db": "drizzle-kit",
     "db:push": "drizzle-kit push",
