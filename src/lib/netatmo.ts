@@ -11,14 +11,22 @@ export type NetatmoApiClient = {
       accessToken: string
       deviceId: string
       scale: "max" | "30min" | "1hour" | "3hours" | "1day" | "1week" | "1month"
-      types: ("temperature" | "humidity" | "CO2" | "noise" | "pressure")[]
+      type: "temperature" | "humidity" | "CO2" | "noise" | "pressure"
       dateBegin?: Date
       dateEnd?: Date
       limit?: number
       optimize?: boolean
       realtime?: boolean
-    }) => any
+    }) => Promise<GetMeasureData>
   }
+}
+
+export type GetMeasureData = {
+  /** The key is a UNIX timestamp in seconds (must be multiplied x1000 when passed to `new Date()`). The value is an array with one item, which is the measurement for the requested `type` at the given timestamp. */
+  body: Record<number, [number]>
+  status: string
+  time_exec: number
+  time_server: number
 }
 
 export const createNetatmoApiClient = (clientParams: {
@@ -62,15 +70,15 @@ export const createNetatmoApiClient = (clientParams: {
         const searchParams = new URLSearchParams()
         searchParams.append("device_id", params.deviceId)
         searchParams.append("scale", params.scale)
-        for (const type of params.types) {
-          searchParams.append("type", type)
-        }
+        searchParams.append("type", params.type)
         if (params.dateBegin)
           searchParams.append("date_begin", `${Math.floor(+params.dateBegin / 1000)}`)
         if (params.dateEnd) searchParams.append("date_end", `${Math.floor(+params.dateEnd / 1000)}`)
         if (params.limit) searchParams.append("limit", `${params.limit}`)
-        if (params.optimize) searchParams.append("optimize", "true")
-        if (params.realtime) searchParams.append("realtime", "true")
+        if (params.optimize !== undefined)
+          searchParams.append("optimize", params.optimize ? "true" : "false")
+        if (params.realtime !== undefined)
+          searchParams.append("realtime", params.realtime ? "true" : "false")
 
         const res = await fetch(`${BASE_API_URL}/api/getmeasure?${searchParams.toString()}`, {
           headers: {
@@ -83,7 +91,7 @@ export const createNetatmoApiClient = (clientParams: {
             status: res.status,
             body: (await res.json().catch(() => null)) as any,
           })
-        const data = await res.json() // TODO: type data
+        const data = (await res.json()) as GetMeasureData
         return data
       },
     },

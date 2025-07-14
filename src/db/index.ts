@@ -3,6 +3,7 @@ import { env } from "~/lib/env"
 
 export const db = drizzle({
   connection: {
-    url: env.DATABASE_URL,
+    url: env.TURSO_DB_URL,
+    authToken: env.TURSO_DB_TOKEN,
   },
 })

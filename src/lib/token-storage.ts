@@ -1,21 +1,20 @@
-import fs from "fs/promises"
-import { z } from "zod"
+import { db } from "~/db"
+import { Tokens } from "~/db/schema"
+import { logger } from "~/lib/logger"
 
-const TOKEN_FILENAME = "./tokens.json"
-
-const TokenPairSchema = z.object({
-  accessToken: z.string(),
-  refreshToken: z.string(),
-})
-
-type TokenPair = z.infer<typeof TokenPairSchema>
+export type TokenPair = {
+  accessToken: string
+  refreshToken: string
+}
 
 export const loadTokens = async () => {
-  const content = await fs.readFile(TOKEN_FILENAME, "utf-8")
-  const tokens = TokenPairSchema.parse(JSON.parse(content))
+  logger.i("Loading tokens")
+  const tokens = (await db.select().from(Tokens).limit(1))[0]
+  if (!tokens) throw new Error("Missing database auth token record.")
   return tokens
 }
 
 export const storeTokens = async (tokens: TokenPair) => {
-  await fs.writeFile(TOKEN_FILENAME, JSON.stringify(tokens, null, 2))
+  logger.i("Storing tokens")
+  await db.update(Tokens).set(tokens)
 }

@@ -11,6 +11,9 @@ importers:
       '@libsql/client':
         specifier: ^0.15.9
         version: 0.15.9
+      chalk:
+        specifier: ^5.4.1
+        version: 5.4.1
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -410,6 +413,10 @@ packages:
 
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
+
+  chalk@5.4.1:
+    resolution: {integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   cross-env@7.0.3:
     resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
@@ -883,6 +890,8 @@ snapshots:
       '@types/node': 22.15.34
 
   buffer-from@1.1.2: {}
+
+  chalk@5.4.1: {}
 
   cross-env@7.0.3:
     dependencies:

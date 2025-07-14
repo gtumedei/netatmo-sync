@@ -14,8 +14,20 @@ export const Measurements = sqliteTable(
     timestamp: integer({ mode: "timestamp" }).notNull(),
     temperature: real(),
     humidity: integer(),
+    CO2: integer(),
     noise: integer(),
     pressure: real(),
   },
   (table) => [primaryKey({ columns: [table.sensorId, table.timestamp] })]
+)
+
+export type MeasurementInsert = typeof Measurements.$inferInsert
+
+export const Tokens = sqliteTable(
+  "token",
+  {
+    accessToken: text().notNull(),
+    refreshToken: text().notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.accessToken, table.refreshToken] })]
 )
