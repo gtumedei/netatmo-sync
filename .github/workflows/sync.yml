@@ -4,6 +4,15 @@ on:
   # schedule:
   #   - cron: 0 * * * *
   workflow_dispatch:
+    inputs:
+      date-begin:
+        type: string
+        description: Date Begin in YYYY-MM-DDTHH:mm:ss.000Z format
+        required: false
+      date-end:
+        type: string
+        description: Date End in YYYY-MM-DDTHH:mm:ss.000Z format
+        required: false
 
 jobs:
   sync:
@@ -13,7 +22,7 @@ jobs:
         id: syncRequest
         uses: fjogeleit/http-request-action@v1
         with:
-          url: "${{ vars.BASE_URL }}/api/sync"
+          url: "${{ vars.BASE_URL }}/api/sync?date_begin=${{ github.event.inputs.date-begin }}&date_end=${{ github.event.inputs.date-end }}"
           method: "GET"
           bearerToken: ${{ secrets.CRON_SECRET }}
       - name: Show Response
