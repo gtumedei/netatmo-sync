@@ -23,8 +23,8 @@ export const executeNetatmoSync = async () => {
   })
   logger.i("Netatmo API client created")
 
-  // Fetch data from the past hour (e.g. if running at 10:30 it will fetch data from 9:00:00.000 to 9:59:59.999)
-  const dateBegin = dayjs().startOf("hour").subtract(1, "hour").toDate()
+  // Fetch data from the past 2 hours (e.g. if running at 10:30 it will fetch data from 8:00:00.000 to 9:59:59.999)
+  const dateBegin = dayjs().startOf("hour").subtract(2, "hour").toDate()
   const dateEnd = dayjs().startOf("hour").subtract(1, "millisecond").toDate()
   logger.i(`Fetching data from ${dateBegin.toISOString()} to ${dateEnd.toISOString()}`)
 
