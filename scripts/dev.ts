@@ -1,3 +1,5 @@
 import { executeNetatmoSync } from "../src"
 
-await executeNetatmoSync()
+const res = await executeNetatmoSync()
+
+console.log(res)

@@ -1,4 +1,6 @@
 // @ts-check
 import { executeNetatmoSync } from "../dist/index.js"
 
-await executeNetatmoSync()
+const res = await executeNetatmoSync()
+
+console.log(res)

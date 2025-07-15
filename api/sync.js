@@ -13,7 +13,9 @@ export const GET = async (request) => {
   }
 
   // Run sync
-  await executeNetatmoSync()
+  const { metrics } = await executeNetatmoSync()
 
-  return Response.json({ success: true })
+  return metrics.errors == 0
+    ? Response.json({ success: true, metrics })
+    : Response.json({ success: false, metrics }, { status: 500 })
 }
