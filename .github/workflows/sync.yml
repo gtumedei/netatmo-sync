@@ -13,7 +13,7 @@ jobs:
         id: syncRequest
         uses: fjogeleit/http-request-action@v1
         with:
-          url: "${{ env.BASE_URL }}/api/sync"
+          url: "${{ vars.BASE_URL }}/api/sync"
           method: "GET"
           bearerToken: ${{ secrets.CRON_SECRET }}
       - name: Show Response
