@@ -7,11 +7,11 @@ on:
     inputs:
       date-begin:
         type: string
-        description: Date Begin in YYYY-MM-DDTHH:mm:ss.000Z format
+        description: Date Begin (YYYY-MM-DDTHH:mm:ss.000Z format, optional)
         required: false
       date-end:
         type: string
-        description: Date End in YYYY-MM-DDTHH:mm:ss.000Z format
+        description: Date End (YYYY-MM-DDTHH:mm:ss.000Z format, optional)
         required: false
 
 jobs:

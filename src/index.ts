@@ -8,7 +8,17 @@ import { createNetatmoApiClient, GetMeasureData, NetatmoError } from "~/lib/neta
 import Time from "~/lib/time"
 import { loadTokens, storeTokens } from "~/lib/token-storage"
 
-export const executeNetatmoSync = async () => {
+type SyncOptions = {
+  dateBegin: string | null | undefined
+  dateEnd: string | null | undefined
+}
+
+const defaultOptions: SyncOptions = {
+  dateBegin: null,
+  dateEnd: null,
+}
+
+export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) => {
   logger.clearHistory()
 
   let tokens = await loadTokens()
@@ -24,9 +34,20 @@ export const executeNetatmoSync = async () => {
   logger.i("Netatmo API client created")
 
   // Fetch data from the past 2 hours (e.g. if running at 10:30 it will fetch data from 8:00:00.000 to 9:59:59.999)
-  const dateBegin = dayjs().startOf("hour").subtract(2, "hour").toDate()
-  const dateEnd = dayjs().startOf("hour").subtract(1, "millisecond").toDate()
-  logger.i(`Fetching data from ${dateBegin.toISOString()} to ${dateEnd.toISOString()}`)
+  let dateBegin = dayjs().startOf("hour").subtract(2, "hour").toDate()
+  let dateEnd = dayjs().startOf("hour").subtract(1, "millisecond").toDate()
+  // Timestamps can be overwritten via options
+  if (options.dateBegin && options.dateEnd) {
+    dateBegin = new Date(options.dateBegin)
+    dateEnd = new Date(options.dateEnd)
+    logger.i(
+      `Fetching data from ${dateBegin.toISOString()} to ${dateEnd.toISOString()} (custom settings)`
+    )
+  } else {
+    logger.i(
+      `Fetching data from ${dateBegin.toISOString()} to ${dateEnd.toISOString()} (default settings)`
+    )
+  }
 
   const types = ["temperature", "humidity", "CO2", "noise", "pressure"] as const
 
