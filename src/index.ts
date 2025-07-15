@@ -170,12 +170,6 @@ export const executeNetatmoSync = async () => {
     errors: logger.history.e.length,
   }
 
-  // Send error email if there are any errors
-  if (metrics.errors > 0) {
-    // TODO
-    console.log(JSON.stringify(logger.history.e, null, 2))
-  }
-
   logger.i("Done")
 
   return { metrics }

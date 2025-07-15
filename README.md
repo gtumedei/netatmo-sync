@@ -43,4 +43,3 @@ A service to sync [Netatmo Aircare](https://shop.netatmo.com/aircare) measuremen
 ## TODO
 
 - [ ] Enable GitHub action cronjob
-- [ ] Implement error notifications
