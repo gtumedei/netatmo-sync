@@ -43,7 +43,3 @@ A service to sync [Netatmo Aircare](https://shop.netatmo.com/aircare) measuremen
   - If running locally, you can provide custom timestamps via the `DATE_BEGIN` and `DATE_END` environment variables
   - If running on a web server, you can provide them via the `date_begin` and `date_end` search parameters
   - All dates must be in ISO format (e.g. `2025-01-01T12:00:00.000Z`)
-
-## TODO
-
-- [ ] Enable GitHub action cronjob
