@@ -10,6 +10,8 @@ const EnvSchema = z.object({
   NETATMO_CLIENT_ID: z.string(),
   NETATMO_CLIENT_SECRET: z.string(),
   CRON_SECRET: z.string(),
+  DATE_BEGIN: z.string().nullish(),
+  DATE_END: z.string().nullish(),
 })
 
 const formatErrors = (errors: ZodFormattedError<Map<string, string>, string>) =>

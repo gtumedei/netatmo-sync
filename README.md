@@ -39,6 +39,10 @@ A service to sync [Netatmo Aircare](https://shop.netatmo.com/aircare) measuremen
 - Deploy the service
   - If you want to deploy on Vercel, make sure to add your environment variables there too
   - If you want to run the GitHub action, you need to fork this repo and have the service deployed somewhere; you also need to set the BASE_URL environment variable and the CRON_SECRET repo secret on GitHub
+- Custom sync range
+  - If running locally, you can provide custom timestamps via the `DATE_BEGIN` and `DATE_END` environment variables
+  - If running on a web server, you can provide them via the `date_begin` and `date_end` search parameters
+  - All dates must be in ISO format (e.g. `2025-01-01T12:00:00.000Z`)
 
 ## TODO
 

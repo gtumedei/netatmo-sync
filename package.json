@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "preview": "cross-env NODE_ENV=production node scripts/preview.js",
+    "start": "cross-env NODE_ENV=production node scripts/start.js",
     "dev": "cross-env NODE_ENV=development tsx scripts/dev.ts",
     "build": "esbuild src/index.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/index.js",
     "typecheck": "tsc --noEmit",

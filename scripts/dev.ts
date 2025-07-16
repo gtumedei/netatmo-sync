@@ -1,8 +1,5 @@
-import { executeNetatmoSync } from "../src"
+import { netatmoSyncLocalHandler } from "../src"
 
-const dateBegin = process.env.DATE_BEGIN
-const dateEnd = process.env.DATE_END
-
-const res = await executeNetatmoSync({ dateBegin, dateEnd })
+const res = await netatmoSyncLocalHandler()
 
 console.log(res)
