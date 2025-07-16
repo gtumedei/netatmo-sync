@@ -25,6 +25,7 @@ jobs:
           url: "${{ vars.BASE_URL }}/api/sync?date_begin=${{ github.event.inputs.date-begin }}&date_end=${{ github.event.inputs.date-end }}"
           method: "GET"
           bearerToken: ${{ secrets.CRON_SECRET }}
+          timeout: 30000 # 30s
       - name: Show Response
         run: |
           echo ${{ steps.syncRequest.outputs.status }}
