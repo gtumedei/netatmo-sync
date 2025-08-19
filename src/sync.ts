@@ -1,5 +1,5 @@
 import dayjs from "dayjs"
-import { desc } from "drizzle-orm"
+import { desc, eq } from "drizzle-orm"
 import { db } from "~/db"
 import { MeasurementInsert, Measurements, Sensors } from "~/db/schema"
 import { env } from "~/lib/env"
@@ -24,7 +24,7 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
   let tokens = await loadTokens()
   logger.s("Loaded tokens from the file system")
 
-  const sensors = await db.select().from(Sensors)
+  const sensors = await db.select().from(Sensors).where(eq(Sensors.enabled, true))
   logger.s(`Loaded the list of sensors from the database (${sensors.length} items)`)
 
   const netatmo = createNetatmoApiClient({
@@ -50,6 +50,8 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
   }
 
   const types = ["temperature", "humidity", "CO2", "noise", "pressure"] as const
+
+  if (sensors.length == 0) logger.i("No enabled sensors found: skipping fetch operations")
 
   // For each sensor
   for (const sensor of sensors) {

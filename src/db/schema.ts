@@ -3,6 +3,7 @@ import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite
 export const Sensors = sqliteTable("sensors", {
   id: text().primaryKey(),
   name: text(),
+  enabled: integer({ mode: "boolean" }).default(true),
 })
 
 export const Measurements = sqliteTable(
