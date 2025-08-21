@@ -41,11 +41,11 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
     dateBegin = new Date(options.dateBegin)
     dateEnd = new Date(options.dateEnd)
     logger.i(
-      `Fetching data from ${dateBegin.toISOString()} to ${dateEnd.toISOString()} (custom settings)`
+      `Data fetching range: from ${dateBegin.toISOString()} to ${dateEnd.toISOString()} (custom settings)`
     )
   } else {
     logger.i(
-      `Fetching data from ${dateBegin.toISOString()} to ${dateEnd.toISOString()} (default settings)`
+      `Data fetching range: from ${dateBegin.toISOString()} to ${dateEnd.toISOString()} (default settings)`
     )
   }
 
@@ -179,13 +179,17 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
     }
 
     // Store the fetched data in the db, avoiding duplicates
-    logger.i("Storing data in the database")
-    const res = await db.insert(Measurements).values(dataRows).onConflictDoNothing()
-    logger.s(
-      `Successfully inserted ${res.rowsAffected} new records (${
-        dataRows.length - res.rowsAffected
-      } entries were already in the database)`
-    )
+    if (dataRows.length > 0) {
+      logger.i("Storing data in the database")
+      const res = await db.insert(Measurements).values(dataRows).onConflictDoNothing()
+      logger.s(
+        `Successfully inserted ${res.rowsAffected} new records (${
+          dataRows.length - res.rowsAffected
+        } entries were already in the database)`
+      )
+    } else {
+      logger.e("No records were found: skipping database insert")
+    }
   }
 
   const metrics = {
