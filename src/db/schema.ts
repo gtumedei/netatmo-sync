@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm"
 import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core"
 
 export const Sensors = sqliteTable("sensors", {
@@ -29,6 +30,10 @@ export const Tokens = sqliteTable(
   {
     accessToken: text().notNull(),
     refreshToken: text().notNull(),
+    updatedAt: text()
+      .notNull()
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => [primaryKey({ columns: [table.accessToken, table.refreshToken] })]
 )

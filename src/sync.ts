@@ -21,8 +21,8 @@ const defaultOptions: SyncOptions = {
 export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) => {
   logger.clearHistory()
 
-  let tokens = await loadTokens()
-  logger.s("Loaded tokens from the file system")
+  let { tokens, updatedAt } = await loadTokens()
+  logger.s(`Loaded tokens from the file system (last updated on ${updatedAt.toISOString()})`)
 
   const sensors = await db.select().from(Sensors).where(eq(Sensors.enabled, true))
   logger.s(`Loaded the list of sensors from the database (${sensors.length} items)`)
@@ -53,6 +53,21 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
 
   if (sensors.length == 0) logger.i("No enabled sensors found: skipping fetch operations")
 
+  // Refresh access token if issued more than 120 minutes ago (basically update it every 2-3 runs)
+  const shouldRefresh = +new Date() - +updatedAt > Time.Minute * 120
+  if (shouldRefresh)
+    try {
+      logger.i("Re-authenticating")
+      const newTokens = await netatmo.authentication.refresh({
+        refreshToken: tokens.refreshToken,
+      })
+      await storeTokens(newTokens)
+      tokens = newTokens
+      logger.s("Re-authentication completed successfully")
+    } catch (err2) {
+      logger.e("Re-authentication failed\n", err2)
+    }
+
   // For each sensor
   for (const sensor of sensors) {
     logger.i(`Fetching data for sensor "${sensor.name}" (ID: ${sensor.id})`)
@@ -65,55 +80,41 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
       pressure: null,
     }
 
-    for (const type of types) {
-      logger.i(`Fetching "${type}" data`)
+    await Promise.all(
+      types.map(async (type) => {
+        logger.i(`[${type}] Fetching data`)
 
-      let attempts = 0
-      let tokenWasExpired = false
-
-      do {
-        logger.i(`Attempt n°${attempts + 1}`)
-        try {
-          // Fetch the latest data from Netatmo
-          latestData[type] = await netatmo.aircare.getMeasure({
-            accessToken: tokens.accessToken,
-            deviceId: sensor.id,
-            scale: "max",
-            type,
-            dateBegin,
-            dateEnd,
-            optimize: false,
-            realtime: false,
-          })
-          const recordCount = Object.keys(latestData[type].body).length
-          logger.s(`Data fetched successfully (${recordCount} records)`)
-        } catch (err) {
-          console.error(err)
-          if (err instanceof NetatmoError && err.status == 403) {
-            // If data fetching fails because of an expired access token, renew it and retry
-            logger.w("Auth error: re-authenticating")
-            try {
-              const newTokens = await netatmo.authentication.refresh({
-                refreshToken: tokens.refreshToken,
-              })
-              await storeTokens(newTokens)
-              tokens = newTokens
-              tokenWasExpired = true
-              logger.s("Re-authentication completed successfully")
-            } catch (err2) {
-              logger.e("Re-authentication failed\n", err2)
-            }
-          } else {
+        let attempts = 0
+        do {
+          logger.i(`[${type}] Attempt n°${attempts + 1}`)
+          try {
+            // Fetch the latest data from Netatmo
+            latestData[type] = await netatmo.aircare.getMeasure({
+              accessToken: tokens.accessToken,
+              deviceId: sensor.id,
+              scale: "max",
+              type,
+              dateBegin,
+              dateEnd,
+              optimize: false,
+              realtime: false,
+            })
+            const recordCount = Object.keys(latestData[type].body).length
+            logger.s(`[${type}] Data fetched successfully (${recordCount} records)`)
+          } catch (err) {
+            console.error(err)
             // If data fetching fails because of some other errors, wait 300ms and retry up to two times
-            logger.e(err instanceof NetatmoError ? "Known error" : "Unknown error")
+            logger.e(
+              err instanceof NetatmoError ? `[${type}] Known error` : `[${type}] Unknown error`
+            )
             await new Promise((r) => setTimeout(r, 300))
           }
-        }
-        attempts++
-      } while (!latestData[type] && (attempts < 3 || (tokenWasExpired && attempts < 4)))
+          attempts++
+        } while (!latestData[type] && attempts < 3)
 
-      if (!latestData[type]) logger.e(`Failed to fetch "${type}" data`)
-    }
+        if (!latestData[type]) logger.e(`[${type}] Failed to fetch data`)
+      })
+    )
 
     // Gather timestamps across all types. This shouldn't be necessary as the timestamps should match exactly across different types, but we found no documentation about this behavior, so it's better not to make any assumptions.
 
