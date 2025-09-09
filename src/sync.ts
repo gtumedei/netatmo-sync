@@ -104,7 +104,7 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
           } catch (err) {
             console.error(err)
             // If data fetching fails because of some other errors, wait 300ms and retry up to two times
-            logger.e(
+            logger.w(
               err instanceof NetatmoError ? `[${type}] Known error` : `[${type}] Unknown error`
             )
             await new Promise((r) => setTimeout(r, 300))
