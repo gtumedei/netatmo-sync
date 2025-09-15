@@ -131,7 +131,7 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
     logger.i(`There are ${timestamps.length} timestamps`)
     for (const type of types) {
       if (timestamps.length != getTimestamps(latestData[type]).length) {
-        logger.e(`Measurements are missing for type ${type}`)
+        logger.w(`Measurements are missing for type ${type}`)
       }
     }
 
