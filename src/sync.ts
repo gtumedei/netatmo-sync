@@ -131,7 +131,7 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
     logger.i(`There are ${timestamps.length} timestamps`)
     for (const type of types) {
       if (timestamps.length != getTimestamps(latestData[type]).length) {
-        logger.w(`Measurements are missing for type ${type}`)
+        logger.w(`[${type}] Some measurements are missing`)
       }
     }
 
@@ -148,15 +148,18 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
 
     const MAX_TIME_BETWEEN_MEASUREMENTS = Time.Minute * 15
 
-    // Make sure there are no gaps greater than 15 minutes in the fetched data
-    for (let i = 1; i < dataRows.length; i++) {
-      const currRow = dataRows[i]!
-      const prevRow = dataRows[i - 1]!
-      const diff = dayjs(currRow.timestamp).diff(prevRow.timestamp)
-      if (diff > MAX_TIME_BETWEEN_MEASUREMENTS) {
-        logger.e(
-          `There are no measurements between ${prevRow.timestamp.toISOString()} and ${currRow.timestamp.toISOString()}`
-        )
+    // Check each data type individually for gaps greater than 15 minutes in the fetched values
+    for (const type of types) {
+      const rowsForType = dataRows.filter((r) => r[type] != null)
+      for (let i = 1; i < rowsForType.length; i++) {
+        const currRow = rowsForType[i]!
+        const prevRow = rowsForType[i - 1]!
+        const diff = dayjs(currRow.timestamp).diff(prevRow.timestamp)
+        if (diff > MAX_TIME_BETWEEN_MEASUREMENTS) {
+          logger.e(
+            `[${type}] There are no measurements between ${prevRow.timestamp.toISOString()} and ${currRow.timestamp.toISOString()}`
+          )
+        }
       }
     }
 
