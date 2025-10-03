@@ -55,7 +55,7 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
 
   // Refresh access token if issued more than 120 minutes ago (basically update it every 2-3 runs)
   const shouldRefresh = +new Date() - +updatedAt > Time.Minute * 120
-  if (shouldRefresh)
+  if (shouldRefresh) {
     try {
       logger.i("Re-authenticating")
       const newTokens = await netatmo.authentication.refresh({
@@ -64,9 +64,10 @@ export const executeNetatmoSync = async (options: SyncOptions = defaultOptions) 
       await storeTokens(newTokens)
       tokens = newTokens
       logger.s("Re-authentication completed successfully")
-    } catch (err2) {
-      logger.e("Re-authentication failed\n", err2)
+    } catch (err) {
+      logger.e("Re-authentication failed\n", err)
     }
+  }
 
   // For each sensor
   for (const sensor of sensors) {

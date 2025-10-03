@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm"
-import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { index, integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core"
 
 export const Sensors = sqliteTable("sensors", {
   id: text().primaryKey(),
@@ -20,7 +20,10 @@ export const Measurements = sqliteTable(
     noise: integer(),
     pressure: real(),
   },
-  (table) => [primaryKey({ columns: [table.sensorId, table.timestamp] })]
+  (table) => [
+    primaryKey({ columns: [table.sensorId, table.timestamp] }),
+    index("timestamp_idx").on(table.timestamp),
+  ]
 )
 
 export type MeasurementInsert = typeof Measurements.$inferInsert
